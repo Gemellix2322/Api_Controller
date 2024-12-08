@@ -47,14 +47,12 @@ public class ProcessoController : ControllerBase
             await connection.OpenAsync();
             var sql = @"
                 SELECT 
-                    processo.*,
-                    emp_exportador.razaosocial_emp AS nome_exportador,
-                    emp_importador.razaosocial_emp AS nome_importador,
-                    processo_usuario.nome_usu AS nome_usuario,
-                    processotracking.nro_pro AS numero_processo,
-                    processotracking.ano_pro AS ano_processo,
-                    processotracking.previsaodata AS pt_chegada,
-                    processotracking.confirmacaodata AS pt_embarque
+                processo.*,
+                emp_exportador.razaosocial_emp AS nome_exportador,
+                emp_importador.razaosocial_emp AS nome_importador,
+                processo_usuario.nome_usu AS nome_usuario,
+                processotracking.nro_pro AS numero_processo,
+                processotracking.ano_pro AS ano_processo
                 FROM processo
                 INNER JOIN empresa AS emp_exportador ON processo.cod_exportador = emp_exportador.cod_emp
                 INNER JOIN empresa AS emp_importador ON processo.cod_importador = emp_importador.cod_emp
@@ -62,7 +60,11 @@ public class ProcessoController : ControllerBase
                 INNER JOIN processotracking 
                 ON processo.nro_pro = processotracking.nro_pro 
                 AND processo.ano_pro = processotracking.ano_pro 
-                WHERE processotracking.ordem = 1";
+                AND processotracking.ordem = 1
+                INNER JOIN processotracking AS pt_chegada 
+                ON processo.nro_pro = pt_chegada.nro_pro 
+                AND processo.ano_pro = pt_chegada.ano_pro 
+                AND pt_chegada.ordem = 2";
 
             using var command = new MySqlCommand(sql, connection);
             using var reader = await command.ExecuteReaderAsync();
